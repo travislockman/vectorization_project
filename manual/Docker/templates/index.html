@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Search App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>o_O Travis' Text Vectorizor O_o</h1>
+        <h6>...made with the help of OpenAI, to talk to OpenAI, which doesn't always know about OpenAI...</h6>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-{{ messages[0][0] }}">
+                    {{ messages[0][1] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Input Form -->
+        <form method="POST" action="/">
+            <div class="form-group">
+                <label for="text">Enter the text you want vectorized with OpenAI and stored in Mongo, pretty please:</label>
+                <input type="text" name="text" id="text" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Generate Vector and Save</button>
+        </form>
+
+        <hr>
+
+        <!-- Search Form -->
+        <form method="GET" action="/search">
+            <div class="form-group">
+                <label for="keyword">Search for any keyword and find its vector in the Mongo database:</label>
+                <input type="text" name="keyword" id="keyword" class="form-control" value="{{ keyword }}">
+            </div>
+            <button type="submit" class="btn btn-warning text-uppercase mt-2 mb-5">Search</button>
+        </form>
+
+        <!-- PTO Request Button with Extra Space -->
+        <div class="my-5"></div>
+        <button id="ptoButton" class="btn btn-danger btn-lg btn-block mb-5">Click here to submit an automatic PTO request</button>
+        
+        <script>
+            document.getElementById("ptoButton").onclick = function() {
+                alert("Just kidding, this button doesn't do anything, but thanks for having that much confidence in me o_O :-P");
+            };
+        </script>
+
+        <!-- Search Results -->
+        {% if results %}
+            <h3 class="mt-4">Results:</h3>
+            <ul class="list-group">
+                {% for result in results %}
+                    <li class="list-group-item">
+                        <strong>Text:</strong> {{ result['text'] }} <br>
+                        <strong>Vector:</strong> {{ result['vector'] }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</body>
+</html>

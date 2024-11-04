@@ -1,0 +1,45 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Wait for MongoDB to start on port 27017
+      wait_for:
+        port: 27017
+        host: 127.0.0.1
+        timeout: 30
+
+    - name: Enable MongoDB authentication
+      blockinfile:
+        path: /etc/mongodb.conf
+        block: |
+          security:
+            authorization: "enabled"
+
+    - name: Restart MongoDB to apply configuration
+      service:
+        name: mongodb
+        state: restarted
+
+    - name: Create MongoDB admin user
+      command: >
+        mongo admin --eval 'db.createUser({user: "adminUser", pwd: "Wiz2024!", roles: [{role: "userAdminAnyDatabase", db: "admin"}]})'
+
+    - name: Create MongoDB backup script
+      copy:
+        dest: /home/ubuntu/mongo_backup.sh
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          TIMESTAMP=$(date +"%F")
+          BACKUP_DIR="/backup/mongodb-$TIMESTAMP"
+          S3_BUCKET="s3://your-s3-bucket-name"
+
+          mkdir -p $BACKUP_DIR
+          mongodump --out $BACKUP_DIR
+          aws s3 cp $BACKUP_DIR $S3_BUCKET --recursive
+
+    - name: Schedule backup with cron
+      cron:
+        name: "MongoDB Backup"
+        job: "/home/ubuntu/mongo_backup.sh"
+        minute: "0"
+        hour: "2"
